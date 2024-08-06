@@ -1,0 +1,23 @@
+{
+  "name": "shops",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node .",
+    "dev": "tsc && node ."
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.21",
+    "body-parser": "^1.20.2",
+    "celebrate": "^15.0.3",
+    "express": "^4.19.2",
+    "oracledb": "^6.6.0"
+  }
+}
