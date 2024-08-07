@@ -3,34 +3,47 @@ import db_query from '../dbconnection';
 import Order from '../models/order';
 import OrderPosition from '../models/orderPosition';
 const oracledb = require('oracledb');
+import { NotFoundError } from '../errors/not-found-err'
 
-import { ordersQueryGet } from '../queries/orders'
-import { orderPositionsQueryGet } from '../queries/orderPositions'
+import { ordersQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/orders'
+import { insertOrdPosQuery, getByOrderIdQuery } from '../queries/orderPositions'
 
+const maxnumrows = 20;
+let offset = 0;
 
-const getQuery = ordersQueryGet
-
-const getOrdPosQuery = orderPositionsQueryGet
 
 module.exports.getAllOrder = async function (req, res, next) {
-    let query = getQuery;
+    let query = ordersQueryGet;
+
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+
+    const params: {[k: string]: any} = { offset, maxnumrows };
 
     if (req.query.clientId || req.query.statusId) {
         query += ' where ';
         let and = '';
         if (req.query.clientId) {
-            query += `ord.client_id = ${req.query.clientId}`;
+            query += `ord.client_id = :clientId`;
             and = ' and ';
+            params.clientId = req.query.clientId
         }
 
         if (req.query.statusId) {
-            query += and + `ord.shop_id = ${req.query.statusId}`;
+            query += and + `ord.status_id = :statusId`;
+            params.statusId = req.query.statusId
         }
     }
+
     
-    const params = [];
     
-    const data = await db_query.exec(query,params);
+    query += paginationQuery;
+    
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
+
 
     const result = data.rows.map(obj => {
         return Order(obj)
@@ -51,29 +64,32 @@ module.exports.createOrder = async function (req, res, next) {
     } = req.body;
 
     const answer = { order: {}, positions: [] }
-    const query = `insert into "order" (total_cost, shop_id, status_id, delivery_id, client_id) values 
-(${totalCost}, ${shopId}, ${statusId}, ${deliveryId}, ${clientId})`;
+    const query = insertQuery;
     
     console.log(query);
     
-    const params = [];
+    const params = {
+        totalCost,
+        shopId,
+        statusId,
+        deliveryId,
+        clientId
+    };
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where ord.rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
         
-        const newItemResult = newItemData.rows.map(obj => {
-            return Order(obj)
-        })
+        const newItemResult = Order(newItemData.rows[0])
 
-        answer.order = await newItemResult[0];
+        answer.order = newItemResult;
 
         let inp = []
         positions.forEach(async function (element) {
             inp.push({
-                orderId: newItemResult[0].id,
+                orderId: newItemResult.id,
                 positionId: element.positionId,
                 count: element.count
             })
@@ -88,13 +104,12 @@ module.exports.createOrder = async function (req, res, next) {
             }
         };
 
-        const addQuery = `INSERT INTO order_position (order_id, position_id, count) 
-            VALUES (:orderId, :positionId, :count)`
+        const addQuery = insertOrdPosQuery
 
         const ordPosResult = await dbconnection.execMany(addQuery, inp, options);
 
-        const newOrdPosQuery = getOrdPosQuery + ` where ordpos.order_id = ${newItemResult[0].id}`;
-        const newOrdPosData = await db_query.exec(newOrdPosQuery,[]);
+        const newOrdPosQuery = getByOrderIdQuery;
+        const newOrdPosData = await db_query.exec(newOrdPosQuery, { orderId: newItemResult.id}, {});
 
         const newOrdPosResult = newOrdPosData.rows.map(obj => {
             return OrderPosition(obj)
@@ -113,39 +128,50 @@ module.exports.createOrder = async function (req, res, next) {
 
 
 module.exports.getOrderById = async function (req, res, next) {
-    const query = getQuery + ` where ord.id = ${req.params.orderId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { orderId: req.params.orderId};
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return Order(obj)
-    })
     
-    res.status(200).json(result);
+    
+    if (data.rows.length == 0) {
+        next(new NotFoundError('Order not found'))
+    } else {
+        const result = Order(data.rows[0])
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delOrderById = async function (req, res, next) {
-    const query = `delete from "order" where id = ${req.params.orderId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { orderId: req.params.orderId};
+    const result = await db_query.exec(query, params, {});
     
     
-    const result = await db_query.exec(query,params);
-    
-    
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('Order not found'));
+
+    } else {
+        res.status(200).json({ message: `Order ${req.params.orderId} deleted` });
+    }
 };
 
 module.exports.getPositionsByOrderId = async function (req, res, next) {
-    const query = getOrdPosQuery + ` where ordpos.order_id = ${req.params.orderId}`;
-    const params = [];
+    const query = getByOrderIdQuery;
+    const params = { orderId: req.params.orderId};
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
     const result = data.rows.map(obj => {
         return OrderPosition(obj)
     })
     
     
-    res.status(200).json(result);
+    if (result.length == 0) {
+        next(new NotFoundError('Shop not found'))
+    } else {
+        res.status(200).json(result);
+    }
 };

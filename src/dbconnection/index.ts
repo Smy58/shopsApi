@@ -2,45 +2,32 @@ const oracledb = require('oracledb');
 oracledb.outFormat = oracledb.OBJECT;
 oracledb.autoCommit = true;
 
-let connection = undefined;
 
-const exec =  async function db_query(query,params) {
-    
-    if( connection === undefined ){
-        console.log('Connecting...');
-
-        connection = await oracledb.getConnection({
-            user:'sys',
-            password:'user',
-            connectionString:'localhost:1521/XEPDB1',
-            privilege: oracledb.SYSDBA
-        });
-        console.log('Connection was successful!');
-    }
+const exec =  async function (query, params, options) {
+    let con = undefined
     try{
-        let result = await connection.execute(query,params);
+        con = await oracledb.getConnection();
+        let result = await con.execute(query,params, options);
         
         return result;
-    }catch (error){
+    } catch (error){
         console.log(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw (err);
+            }
+        }
     }
 }
 
-const execMany =  async function db_query(query, params, options) {
-    
-    if( connection === undefined ){
-        console.log('Connecting...');
-
-        connection = await oracledb.getConnection({
-            user:'sys',
-            password:'user',
-            connectionString:'localhost:1521/XEPDB1',
-            privilege: oracledb.SYSDBA
-        });
-        console.log('Connection was successful!');
-    }
+const execMany =  async function (query, params, options) {
+    let con = undefined
     try{
-        let result = await connection.executeMany(query, params, options);
+        con = await oracledb.getConnection();
+        let result = await con.executeMany(query, params, options);
         
         return result;
     }catch (error){

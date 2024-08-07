@@ -8,14 +8,14 @@ const {
     getAllStatus, createStatus, getStatusById, delStatusById
 } = require('../controllers/statuses');
 
-router.get('/statuses', getAllStatus);
-router.post('/statuses', celebrate({
+router.get('/', getAllStatus);
+router.post('/', celebrate({
     body: Joi.object().keys({
         name: Joi.string().min(2).max(30)
     }),
 }), createStatus);
-router.get('/statuses/:statusId', getStatusById);
-router.delete('/statuses/:statusId', delStatusById);
+router.get('/:statusId', getStatusById);
+router.delete('/:statusId', delStatusById);
 
 
 

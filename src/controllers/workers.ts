@@ -1,31 +1,43 @@
 import db_query from '../dbconnection';
 import Worker from '../models/worker';
+import { NotFoundError } from '../errors/not-found-err'
 
-import { workersQueryGet } from '../queries/workers'
+import { workersQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/workers'
 
-
-const getQuery = workersQueryGet
+const maxnumrows = 20;
+let offset = 0;
 
 module.exports.getAllWorker = async function (req, res, next) {
-    let query = getQuery;
+    let query = workersQueryGet;
+
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+
+    const params: {[k: string]: any} = { offset, maxnumrows };
 
     if (req.query.roleId || req.query.shopId) {
         query += ' where ';
         let and = '';
         if (req.query.roleId) {
-            query += `w.role_id = ${req.query.roleId}`;
+            query += `w.role_id = :roleId`;
             and = ' and ';
+            params.roleId = req.query.roleId
         }
 
         if (req.query.shopId) {
-            query += and + `w.shop_id = ${req.query.shopId}`;
+            query += and + `w.shop_id = :shopId`;
+            params.shopId = req.query.shopId
+
         }
     }
     
     
-    const params = [];
+    query += paginationQuery;
     
-    const data = await db_query.exec(query,params);
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
 
     const result = data.rows.map(obj => {
         return Worker(obj)
@@ -41,20 +53,21 @@ module.exports.createWorker = async function (req, res, next) {
         roleId
     } = req.body;
 
-    const query = `insert into worker (name, shop_id, role_id) values 
-('${name}', ${shopId}, ${roleId})`;
+    const query = insertQuery;
     
-    const params = [];
+    const params = {
+        name, 
+        shopId, 
+        roleId
+    };
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where w.rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
         
-        const newItemResult = newItemData.rows.map(obj => {
-            return Worker(obj)
-        })
+        const newItemResult = Worker(newItemData.rows[0])
         
         res.status(200).json(newItemResult);
 
@@ -65,25 +78,34 @@ module.exports.createWorker = async function (req, res, next) {
 
 
 module.exports.getWorkerById = async function (req, res, next) {
-    const query = getQuery + ` where w.id = ${req.params.workerId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { workerId: req.params.workerId};
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return Worker(obj)
-    })
     
-    res.status(200).json(result);
+    if (data.rows.length == 0) {
+        next(new NotFoundError('Worker not found'))
+    } else {
+        const result = Worker(data.rows[0])
+
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delWorkerById = async function (req, res, next) {
-    const query = `delete from worker where id = ${req.params.workerId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { workerId: req.params.workerId};
     
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('Worker not found'));
+
+    } else {
+        res.status(200).json({ message: `Worker ${req.params.workerId} deleted` });
+    }
 };

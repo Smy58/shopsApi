@@ -8,16 +8,16 @@ const {
     getAllWorker, createWorker, getWorkerById, delWorkerById
 } = require('../controllers/workers');
 
-router.get('/workers', getAllWorker);
-router.post('/workers', celebrate({
+router.get('/', getAllWorker);
+router.post('/', celebrate({
     body: Joi.object().keys({
         name: Joi.string().min(2).max(30),
         shopId: Joi.number().integer(),
         roleId: Joi.number().integer()
     }),
 }), createWorker);
-router.get('/workers/:workerId', getWorkerById);
-router.delete('/workers/:workerId', delWorkerById);
+router.get('/:workerId', getWorkerById);
+router.delete('/:workerId', delWorkerById);
 
 
 

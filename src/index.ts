@@ -1,9 +1,15 @@
 import express from 'express'
 import bodyParser from 'body-parser';
+import { errors } from 'celebrate';
 
 
 const { PORT = 5000 } = process.env;
 const app = express();
+
+const database = require('./dbconnection/dbpool');
+
+database.initialize()
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,27 +34,33 @@ app.use((req, res, next) => {
     if (method === 'OPTIONS') {
       res.header('Access-Control-Allow-Headers', requestHeaders);
       res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
-      res.status(200).send();
+      res.status(200);
     }
   
     next();
 });
 
 
-app.use('/', require('./routes/shops'));
-app.use('/', require('./routes/products'));
-app.use('/', require('./routes/workers'));
-app.use('/', require('./routes/contacts'));
-app.use('/', require('./routes/mails'));
-app.use('/', require('./routes/roles'));
-app.use('/', require('./routes/clients'));
-app.use('/', require('./routes/deliveries'));
-app.use('/', require('./routes/statuses'));
-app.use('/', require('./routes/shopProducts'));
-app.use('/', require('./routes/groups'));
-app.use('/', require('./routes/orders'));
-app.use('/', require('./routes/orderPositions'));
+app.use('/shops', require('./routes/shops'));
+app.use('/products', require('./routes/products'));
+app.use('/workers', require('./routes/workers'));
+app.use('/contacts', require('./routes/contacts'));
+app.use('/mails', require('./routes/mails'));
+app.use('/roles', require('./routes/roles'));
+app.use('/clients', require('./routes/clients'));
+app.use('/deliveries', require('./routes/deliveries'));
+app.use('/statuses', require('./routes/statuses'));
+app.use('/shopProducts', require('./routes/shopProducts'));
+app.use('/groups', require('./routes/groups'));
+app.use('/orders', require('./routes/orders'));
+app.use('/orderPositions', require('./routes/orderPositions'));
 
+app.use(errors());
 
+app.use((err, req, res, next) => {
+  
+  res.status(err.statusCode);
+  res.send({ message: err.message });
+});
 
 app.listen(PORT, () => console.log(`Running on port ${PORT}`));

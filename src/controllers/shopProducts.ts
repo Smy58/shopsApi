@@ -1,21 +1,31 @@
 import db_query from '../dbconnection';
 import ShopProduct from '../models/shopProduct';
+import { NotFoundError } from '../errors/not-found-err'
 
-import { shopProductsQueryGet } from '../queries/shopProducts'
+import { shopProductsQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/shopProducts'
 
-const getQuery = shopProductsQueryGet
+const maxnumrows = 20;
+let offset = 0;
 
 module.exports.getAllShopProduct = async function (req, res, next) {
-    let query = getQuery;
+    let query = shopProductsQueryGet;
     
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+
+    const params: {[k: string]: any} = { offset, maxnumrows };
 
     if (req.query.shopId) {
-        query += ` where shop_id = ${req.query.shopId}`
+        query += ` where shop_id = :shopId`
+        params.shopId = req.query.shopId
     }
     
-    const params = [];
+    query += paginationQuery;
     
-    const data = await db_query.exec(query,params);
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
 
     const result = data.rows.map(obj => {
         return ShopProduct(obj)
@@ -31,20 +41,21 @@ module.exports.createShopProducts = async function (req, res, next) {
         cost
     } = req.body;
 
-    const query = `insert into shop_product (shop_id, product_id, cost) values 
-(${shopId}, ${productId}, ${cost})`;
+    const query = insertQuery;
     
-    const params = [];
+    const params = {
+        shopId,
+        productId,
+        cost
+    };
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where shpr.rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
         
-        const newItemResult = newItemData.rows.map(obj => {
-            return ShopProduct(obj)
-        })
+        const newItemResult = ShopProduct(newItemData.rows[0])
         
         res.status(200).json(newItemResult);
 
@@ -55,25 +66,33 @@ module.exports.createShopProducts = async function (req, res, next) {
 
 
 module.exports.getShopProductById = async function (req, res, next) {
-    const query = getQuery + ` where shpr.id = ${req.params.shopProductId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { shopProductId: req.params.shopProductId};
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return ShopProduct(obj)
-    })
     
-    res.status(200).json(result);
+    if (data.rows.length == 0) {
+        next(new NotFoundError('ShopProduct not found'))
+    } else {
+        const result = ShopProduct(data.rows[0])
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delShopProductById = async function (req, res, next) {
-    const query = `delete from shop_product where id = ${req.params.shopProductId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { shopProductId: req.params.shopProductId};
     
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('ShopProduct not found'));
+
+    } else {
+        res.status(200).json({ message: `ShopProduct ${req.params.shopProductId} deleted` });
+    }
 };

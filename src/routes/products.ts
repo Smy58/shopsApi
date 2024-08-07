@@ -8,8 +8,8 @@ const {
     getAllProducts, createProduct, getProductById, delProductById
 } = require('../controllers/products');
 
-router.get('/products', getAllProducts);
-router.post('/products', celebrate({
+router.get('/', getAllProducts);
+router.post('/', celebrate({
     body: Joi.object().keys({
         name: Joi.string().min(2).max(30),
         description: Joi.string(),
@@ -18,8 +18,8 @@ router.post('/products', celebrate({
         groupId: Joi.number().integer(),
     }),
 }), createProduct);
-router.get('/products/:productId', getProductById);
-router.delete('/products/:productId', delProductById);
+router.get('/:productId', getProductById);
+router.delete('/:productId', delProductById);
 
 
 

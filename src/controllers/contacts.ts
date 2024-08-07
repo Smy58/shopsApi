@@ -1,19 +1,31 @@
 import db_query from '../dbconnection';
 import Contact from '../models/contact';
+import { NotFoundError } from '../errors/not-found-err'
 
-import { contactsQueryGet } from '../queries/contacts'
+import { contactsQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/contacts'
 
-const getQuery = contactsQueryGet
+const maxnumrows = 20;
+let offset = 0;
 
 module.exports.getAllContact = async function (req, res, next) {
-    let query = getQuery;
+    let query = contactsQueryGet;
+
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+
+    const params: {[k: string]: any} = { offset, maxnumrows };
+
     if (req.query.workerId) {
-        query += ` where worker_id = ${req.query.workerId}`
+        query += ` where worker_id = :workerId`
+        params.workerId = req.query.workerId
     }
     
-    const params = [];
+    query += paginationQuery;
     
-    const data = await db_query.exec(query,params);
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
 
     const result = data.rows.map(obj => {
         return Contact(obj)
@@ -28,23 +40,20 @@ module.exports.createContact = async function (req, res, next) {
         phone
     } = req.body;
 
-    const query = `insert into contact (phone, worker_id) values 
-('${phone}', ${workerId})`;
+    const query = insertQuery;
     
-    const params = [];
+    const params = {
+        workerId, 
+        phone
+    };
     
-    const result = await db_query.exec(query,params);
-
-    console.log(result);
-    console.log(result?.lastRowid);
+    const result = await db_query.exec(query, params, {});
     
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where c.rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
         
-        const newItemResult = newItemData.rows.map(obj => {
-            return Contact(obj)
-        })
+        const newItemResult = Contact(newItemData.rows[0]);
         
         res.status(200).json(newItemResult);
 
@@ -55,25 +64,33 @@ module.exports.createContact = async function (req, res, next) {
 
 
 module.exports.getContactById = async function (req, res, next) {
-    const query = getQuery + ` where c.id = ${req.params.contactId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { contactId: req.params.contactId };
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return Contact(obj)
-    })
-    
-    res.status(200).json(result);
+
+    if (data.rows.length == 0) {
+        next(new NotFoundError('Contact not found'))
+    } else {
+        const result = Contact(data.rows[0])
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delContactById = async function (req, res, next) {
-    const query = `delete from contact where id = ${req.params.contactId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { contactId: req.params.contactId };
     
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('Contact not found'));
+
+    } else {
+        res.status(200).json({ message: `Contact ${req.params.contactId} deleted` });
+    }
 };

@@ -8,14 +8,14 @@ const {
     getAllDelivery, createDelivery, getDeliveryById, delDeliveryById
 } = require('../controllers/deliveries');
 
-router.get('/deliveries', getAllDelivery);
-router.post('/deliveries', celebrate({
+router.get('/', getAllDelivery);
+router.post('/', celebrate({
     body: Joi.object().keys({
         workerId: Joi.number().integer()
     }),
 }), createDelivery);
-router.get('/deliveries/:deliveryId', getDeliveryById);
-router.delete('/deliveries/:deliveryId', delDeliveryById);
+router.get('/:deliveryId', getDeliveryById);
+router.delete('/:deliveryId', delDeliveryById);
 
 
 

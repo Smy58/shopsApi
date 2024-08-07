@@ -6,8 +6,8 @@ import { celebrate, Joi } from 'celebrate';
 
 const { getAllShops, createShop, getShopById, delShopById } = require('../controllers/shops');
 
-router.get('/shops', getAllShops);
-router.post('/shops', celebrate({
+router.get('/', getAllShops);
+router.post('/', celebrate({
     body: Joi.object().keys({
         name: Joi.string().min(2).max(30),
         address: Joi.string().min(2).max(30),
@@ -17,8 +17,8 @@ router.post('/shops', celebrate({
         image: Joi.string(),
     }),
 }), createShop);
-router.get('/shops/:shopId', getShopById);
-router.delete('/shops/:shopId', delShopById);
+router.get('/:shopId', getShopById);
+router.delete('/:shopId', delShopById);
 
 
 

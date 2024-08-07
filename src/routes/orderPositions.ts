@@ -3,12 +3,14 @@ const router = exp.Router()
 
 
 const {
-    getAllOrderPosition, getOrderPositionById, delOrderPositionById
+    getAllOrderPosition, getOrderPositionById, delOrderPositionById, getNothing
 } = require('../controllers/orderPositions');
 
-router.get('/orderPositions', getAllOrderPosition);
-router.get('/orderPositions/:orderPositionId', getOrderPositionById);
-router.delete('/orderPositions/:orderPositionId', delOrderPositionById);
+router.get('/', getAllOrderPosition);
+router.get('/:orderPositionId', getOrderPositionById);
+router.delete('/:orderPositionId', delOrderPositionById);
+router.get('/*', getNothing);
+router.post('/*', getNothing);
 
 
 

@@ -24,3 +24,14 @@ export const ordersQueryGet = `select
 ${getOrders}
 from "order" ord
 ${ordersJoins}`
+
+export const insertQuery = `insert into "order" (total_cost, shop_id, status_id, delivery_id, client_id) values 
+(:totalCost, :shopId, :statusId, :deliveryId, :clientId)`
+
+export const getAddedItemQuery = ordersQueryGet + ` where ord.rowid = :lastRowid`
+
+export const getByIdQuery = ordersQueryGet + ` where ord.id = :orderId`
+
+export const deleteByIdQuery = `delete from "order" where id = :orderId`
+
+export const paginationQuery = ` order by ord.id asc OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`

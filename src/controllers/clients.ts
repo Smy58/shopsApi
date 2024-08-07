@@ -1,16 +1,25 @@
 import db_query from '../dbconnection';
 import Client from '../models/client';
+import { NotFoundError } from '../errors/not-found-err'
 
-import { clientsQueryGet } from '../queries/clients'
+import { clientsQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/clients'
 
-const getQuery = clientsQueryGet;
+const maxnumrows = 20;
+let offset = 0;
 
 module.exports.getAllClient = async function (req, res, next) {
-    let query = getQuery;
+    let query = clientsQueryGet;
     
-    const params = [];
+    query += paginationQuery;
     
-    const data = await db_query.exec(query,params);
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+    
+    const params = { offset, maxnumrows };
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
 
     const result = data.rows.map(obj => {
         return Client(obj)
@@ -27,20 +36,22 @@ module.exports.createClient = async function (req, res, next) {
         mail
     } = req.body;
 
-    const query = `insert into client (name, address, phone, mail) values 
-('${name}', '${address}', '${phone}', '${mail}')`;
+    const query = insertQuery;
     
-    const params = [];
+    const params = {
+        name,
+        address,
+        phone,
+        mail
+    };    
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where cl.rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
 
-        const newItemResult = newItemData.rows.map(obj => {
-            return Client(obj)
-        })
+        const newItemResult = Client(newItemData.rows[0])
         
         res.status(200).json(newItemResult);
 
@@ -51,25 +62,32 @@ module.exports.createClient = async function (req, res, next) {
 
 
 module.exports.getClientById = async function (req, res, next) {
-    const query = getQuery + ` where cl.id = ${req.params.clientId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { clientId: req.params.clientId };
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return Client(obj)
-    })
-    
-    res.status(200).json(result);
+    if (data.rows.length == 0) {
+        next(new NotFoundError('Shop not found'))
+    } else {
+        const result = Client(data.rows[0])
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delClientById = async function (req, res, next) {
-    const query = `delete from client where id = ${req.params.clientId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { clientId: req.params.clientId };
     
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('Client not found'));
+
+    } else {
+        res.status(200).json({ message: `Client ${req.params.clientId} deleted` });
+    }
 };

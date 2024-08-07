@@ -8,15 +8,15 @@ const {
     getAllMail, createMail, getMailById, delMailById
 } = require('../controllers/mails');
 
-router.get('/mails', getAllMail);
-router.post('/mails', celebrate({
+router.get('/', getAllMail);
+router.post('/', celebrate({
     body: Joi.object().keys({
         mail: Joi.string().min(2).max(30),
         workerId: Joi.number().integer()
     }),
 }), createMail);
-router.get('/mails/:mailId', getMailById);
-router.delete('/mails/:mailId', delMailById);
+router.get('/:mailId', getMailById);
+router.delete('/:mailId', delMailById);
 
 
 

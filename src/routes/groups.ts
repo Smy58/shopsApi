@@ -8,14 +8,14 @@ const {
     getAllGroup, createGroup, getGroupById, delGroupById
 } = require('../controllers/groups');
 
-router.get('/groups', getAllGroup);
-router.post('/groups', celebrate({
+router.get('/', getAllGroup);
+router.post('/', celebrate({
     body: Joi.object().keys({
         name: Joi.string().min(2).max(30)
     }),
 }), createGroup);
-router.get('/groups/:groupId', getGroupById);
-router.delete('/groups/:groupId', delGroupById);
+router.get('/:groupId', getGroupById);
+router.delete('/:groupId', delGroupById);
 
 
 

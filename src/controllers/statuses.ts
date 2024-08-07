@@ -1,16 +1,25 @@
 import db_query from '../dbconnection';
 import Status from '../models/status';
+import { NotFoundError } from '../errors/not-found-err'
 
-import { statusesQueryGet } from '../queries/statuses'
+import { statusesQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/statuses'
 
-const getQuery = statusesQueryGet
+const maxnumrows = 20;
+let offset = 0;
 
 module.exports.getAllStatus = async function (req, res, next) {
-    let query = getQuery;
+    let query = statusesQueryGet;
     
-    const params = [];
+    query += paginationQuery;
     
-    const data = await db_query.exec(query,params);
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+    
+    const params = { offset, maxnumrows };
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
 
     const result = data.rows.map(obj => {
         return Status(obj)
@@ -24,20 +33,19 @@ module.exports.createStatus = async function (req, res, next) {
         name
     } = req.body;
 
-    const query = `insert into status (name) values 
-('${name}')`;
+    const query = insertQuery;
     
-    const params = [];
+    const params = {
+        name
+    };
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where st.rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
         
-        const newItemResult = newItemData.rows.map(obj => {
-            return Status(obj)
-        })
+        const newItemResult = Status(newItemData.rows[0])
         
         res.status(200).json(newItemResult);
 
@@ -47,25 +55,34 @@ module.exports.createStatus = async function (req, res, next) {
 };
 
 module.exports.getStatusById = async function (req, res, next) {
-    const query = getQuery + ` where st.id = ${req.params.statusId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { statusId: req.params.statusId};
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return Status(obj)
-    })
     
-    res.status(200).json(result);
+    if (data.rows.length == 0) {
+        next(new NotFoundError('Status not found'))
+    } else {
+        const result = Status(data.rows[0])
+
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delStatusById = async function (req, res, next) {
-    const query = `delete from status where id = ${req.params.statusId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { statusId: req.params.statusId};
     
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('Status not found'));
+
+    } else {
+        res.status(200).json({ message: `Status ${req.params.statusId} deleted` });
+    }
 };

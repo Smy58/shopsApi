@@ -1,16 +1,25 @@
 import db_query from '../dbconnection';
 import Group from '../models/group';
+import { NotFoundError } from '../errors/not-found-err'
 
-import { groupsQueryGet } from '../queries/groups'
+import { groupsQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/groups'
 
-const getQuery = groupsQueryGet
+const maxnumrows = 20;
+let offset = 0;
 
 module.exports.getAllGroup = async function (req, res, next) {
-    let query = getQuery;
+    let query = groupsQueryGet;
     
-    const params = [];
+    query += paginationQuery;
     
-    const data = await db_query.exec(query,params);
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+    
+    const params = { offset, maxnumrows };
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
 
     const result = data.rows.map(obj => {
         return Group(obj)
@@ -25,21 +34,20 @@ module.exports.createGroup = async function (req, res, next) {
         name
     } = req.body;
 
-    const query = `insert into "group" (name) values 
-('${name}')`;
+    const query = insertQuery;
     
-    const params = [];
+    const params = {
+        name
+    };
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
 
         
-        const newItemResult = newItemData.rows.map(obj => {
-            return Group(obj)
-        })
+        const newItemResult = Group(newItemData.rows[0])
         
         res.status(200).json(newItemResult);
 
@@ -50,25 +58,34 @@ module.exports.createGroup = async function (req, res, next) {
 
 
 module.exports.getGroupById = async function (req, res, next) {
-    const query = getQuery + ` where id = ${req.params.groupId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { groupId: req.params.groupId};
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return Group(obj)
-    })
     
-    res.status(200).json(result);
+    if (data.rows.length == 0) {
+        next(new NotFoundError('Group not found'))
+    } else {
+        const result = Group(data.rows[0])
+
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delGroupById = async function (req, res, next) {
-    const query = `delete from "group" where id = ${req.params.groupId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { groupId: req.params.groupId};
     
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('Group not found'));
+
+    } else {
+        res.status(200).json({ message: `Group ${req.params.groupId} deleted` });
+    }
 };

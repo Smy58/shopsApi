@@ -8,15 +8,15 @@ const {
     getAllContact, createContact, getContactById, delContactById
 } = require('../controllers/contacts');
 
-router.get('/contacts', getAllContact);
-router.post('/contacts', celebrate({
+router.get('/', getAllContact);
+router.post('/', celebrate({
     body: Joi.object().keys({
         phone: Joi.string().min(2).max(30),
         workerId: Joi.number().integer()
     }),
 }), createContact);
-router.get('/contacts/:contactId', getContactById);
-router.delete('/contacts/:contactId', delContactById);
+router.get('/:contactId', getContactById);
+router.delete('/:contactId', delContactById);
 
 
 

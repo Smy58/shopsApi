@@ -8,14 +8,14 @@ const {
     getAllRole, createRole, getRoleById, delRoleById
 } = require('../controllers/roles');
 
-router.get('/roles', getAllRole);
-router.post('/roles', celebrate({
+router.get('/', getAllRole);
+router.post('/', celebrate({
     body: Joi.object().keys({
         name: Joi.string().min(2).max(30)
     }),
 }), createRole);
-router.get('/roles/:roleId', getRoleById);
-router.delete('/roles/:roleId', delRoleById);
+router.get('/:roleId', getRoleById);
+router.delete('/:roleId', delRoleById);
 
 
 

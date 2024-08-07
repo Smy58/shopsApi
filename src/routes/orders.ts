@@ -8,8 +8,8 @@ const {
     getAllOrder, createOrder, getOrderById, delOrderById, getPositionsByOrderId
 } = require('../controllers/orders');
 
-router.get('/orders', getAllOrder);
-router.post('/orders', celebrate({
+router.get('/', getAllOrder);
+router.post('/', celebrate({
     body: Joi.object().keys({
         totalCost: Joi.number().integer(),
         shopId: Joi.number().integer(),
@@ -24,9 +24,9 @@ router.post('/orders', celebrate({
         )
     }),
 }), createOrder);
-router.get('/orders/:orderId', getOrderById);
-router.delete('/orders/:orderId', delOrderById);
-router.get('/orders/:orderId/positions', getPositionsByOrderId);
+router.get('/:orderId', getOrderById);
+router.delete('/:orderId', delOrderById);
+router.get('/:orderId/positions', getPositionsByOrderId);
 
 
 

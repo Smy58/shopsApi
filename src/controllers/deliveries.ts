@@ -1,16 +1,25 @@
 import db_query from '../dbconnection';
 import Delivery from '../models/delivery';
+import { NotFoundError } from '../errors/not-found-err'
 
-import { deliveriesQueryGet } from '../queries/deliveries'
+import { deliveriesQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/deliveries'
 
-const getQuery = deliveriesQueryGet
+const maxnumrows = 20;
+let offset = 0;
 
 module.exports.getAllDelivery = async function (req, res, next) {
-    let query = getQuery;
+    let query = deliveriesQueryGet;
     
-    const params = [];
+    query += paginationQuery;
     
-    const data = await db_query.exec(query,params);
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+    
+    const params = { offset, maxnumrows };
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
 
     const result = data.rows.map(obj => {
         return Delivery(obj)
@@ -24,20 +33,20 @@ module.exports.createDelivery = async function (req, res, next) {
         workerId
     } = req.body;
 
-    const query = `insert into delivery (worker_id) values 
-(${workerId})`;
+    const query = insertQuery;
     
-    const params = [];
+    const params = {
+        workerId
+    };
     
-    const result = await db_query.exec(query,params);
+    
+    const result = await db_query.exec(query, params, {});
 
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where dl.rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
 
-        const newItemResult = newItemData.rows.map(obj => {
-            return Delivery(obj)
-        })
+        const newItemResult = Delivery(newItemData.rows[0]);
         
         res.status(200).json(newItemResult);
 
@@ -48,25 +57,33 @@ module.exports.createDelivery = async function (req, res, next) {
 
 
 module.exports.getDeliveryById = async function (req, res, next) {
-    const query = getQuery + ` where dl.id = ${req.params.deliveryId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { deliveryId: req.params.deliveryId };
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return Delivery(obj)
-    })
     
-    res.status(200).json(result);
+    if (data.rows.length == 0) {
+        next(new NotFoundError('Contact not found'))
+    } else {
+        const result = Delivery(data.rows[0])
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delDeliveryById = async function (req, res, next) {
-    const query = `delete from delivery where id = ${req.params.deliveryId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { deliveryId: req.params.deliveryId };
     
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('Contact not found'));
+
+    } else {
+        res.status(200).json({ message: `Contact ${req.params.deliveryId} deleted` });
+    }
 };

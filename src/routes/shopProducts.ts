@@ -8,16 +8,16 @@ const {
     getAllShopProduct, createShopProducts, getShopProductById, delShopProductById
 } = require('../controllers/shopProducts');
 
-router.get('/shopProducts', getAllShopProduct);
-router.post('/shopProducts', celebrate({
+router.get('/', getAllShopProduct);
+router.post('/', celebrate({
     body: Joi.object().keys({
         shopId: Joi.number().integer(),
         productId: Joi.number().integer(),
         cost: Joi.number().integer()
     }),
 }), createShopProducts);
-router.get('/shopProducts/:shopProductId', getShopProductById);
-router.delete('/shopProducts/:shopProductId', delShopProductById);
+router.get('/:shopProductId', getShopProductById);
+router.delete('/:shopProductId', delShopProductById);
 
 
 

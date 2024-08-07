@@ -1,17 +1,26 @@
 import db_query from '../dbconnection';
 import Role from '../models/role';
+import { NotFoundError } from '../errors/not-found-err'
 
-import { rolesQueryGet } from '../queries/roles'
+import { rolesQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/roles'
 
+const maxnumrows = 20;
+let offset = 0;
 
-const getQuery = rolesQueryGet
 
 module.exports.getAllRole = async function (req, res, next) {
-    let query = getQuery;
+    let query = rolesQueryGet;
     
-    const params = [];
+    query += paginationQuery;
     
-    const data = await db_query.exec(query,params);
+    if (req.query.page) {
+        offset = (req.query.page - 1) * maxnumrows
+    }
+    
+    const params = { offset, maxnumrows };
+    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
+    
+    const data = await db_query.exec(query, params, options);
 
     const result = data.rows.map(obj => {
         return Role(obj)
@@ -25,20 +34,19 @@ module.exports.createRole = async function (req, res, next) {
         name
     } = req.body;
 
-    const query = `insert into role (name) values 
-('${name}')`;
+    const query = insertQuery;
     
-    const params = [];
+    const params = {
+        name
+    };
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     if (result?.lastRowid) {
-        const newItemQuery = getQuery + ` where rl.rowid = '${result.lastRowid}'`
-        const newItemData = await db_query.exec(newItemQuery,[]);
+        const newItemQuery = getAddedItemQuery
+        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
 
-        const newItemResult = newItemData.rows.map(obj => {
-            return Role(obj)
-        })
+        const newItemResult = Role(newItemData.rows[0])
         
         res.status(200).json(newItemResult);
 
@@ -49,26 +57,35 @@ module.exports.createRole = async function (req, res, next) {
 
 
 module.exports.getRoleById = async function (req, res, next) {
-    const query = getQuery + ` where rl.id = ${req.params.roleId}`;
-    const params = [];
+    const query = getByIdQuery;
+    const params = { roleId: req.params.roleId};
     
-    const data = await db_query.exec(query,params);
+    const data = await db_query.exec(query, params, {});
 
-    const result = data.rows.map(obj => {
-        return Role(obj)
-    })
     
     
-    res.status(200).json(result);
+    if (data.rows.length == 0) {
+        next(new NotFoundError('Role not found'))
+    } else {
+        const result = Role(data.rows[0])
+
+        res.status(200).json(result);
+    }
 };
 
 module.exports.delRoleById = async function (req, res, next) {
-    const query = `delete from role where id = ${req.params.roleId}`;
-    const params = [];
+    const query = deleteByIdQuery;
+    const params = { roleId: req.params.roleId};
     
     
-    const result = await db_query.exec(query,params);
+    const result = await db_query.exec(query, params, {});
     
     
-    res.status(200).json({ message: "deleted" });
+    if (result.rowsAffected == 0) {
+
+        next(new NotFoundError('Role not found'));
+
+    } else {
+        res.status(200).json({ message: `Role ${req.params.roleId} deleted` });
+    }
 };

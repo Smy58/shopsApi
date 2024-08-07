@@ -8,8 +8,8 @@ const {
     getAllClient, createClient, getClientById, delClientById
 } = require('../controllers/clients');
 
-router.get('/clients', getAllClient);
-router.post('/clients', celebrate({
+router.get('/', getAllClient);
+router.post('/', celebrate({
     body: Joi.object().keys({
         name: Joi.string().min(2).max(30),
         address: Joi.string(),
@@ -17,8 +17,8 @@ router.post('/clients', celebrate({
         mail: Joi.string()
     }),
 }), createClient);
-router.get('/clients/:clientId', getClientById);
-router.delete('/clients/:clientId', delClientById);
+router.get('/:clientId', getClientById);
+router.delete('/:clientId', delClientById);
 
 
 
