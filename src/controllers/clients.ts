@@ -7,12 +7,21 @@ let offset = 0;
 module.exports.getAllClient = async function (req, res, next) {
     const params = { offset, maxnumrows };
 
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await clientsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -31,12 +40,21 @@ module.exports.createClient = async function (req, res, next) {
         mail
     };    
 
+    let con = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await clientsDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
     
 };
@@ -45,24 +63,42 @@ module.exports.createClient = async function (req, res, next) {
 module.exports.getClientById = async function (req, res, next) {
     const params = { clientId: req.params.clientId };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await clientsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
 module.exports.delClientById = async function (req, res, next) {
     const params = { clientId: req.params.clientId };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await clientsDbService.delById(con, params);
         res.status(200).json({ message: `Client ${req.params.clientId} deleted` });
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
     
 };

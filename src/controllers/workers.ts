@@ -15,12 +15,21 @@ module.exports.getAllWorker = async function (req, res, next) {
         params.shopId = req.query.shopId
     }
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await workersDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -37,12 +46,21 @@ module.exports.createWorker = async function (req, res, next) {
         roleId
     };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await workersDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -50,23 +68,41 @@ module.exports.createWorker = async function (req, res, next) {
 module.exports.getWorkerById = async function (req, res, next) {
     const params = { workerId: req.params.workerId};
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await workersDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
 module.exports.delWorkerById = async function (req, res, next) {
     const params = { workerId: req.params.workerId};
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await workersDbService.delById(con, params);
         res.status(200).json({ message: `Worker ${req.params.workerId} deleted` });
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };

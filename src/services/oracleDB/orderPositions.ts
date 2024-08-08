@@ -27,15 +27,7 @@ const getAll = async function (con, params, page) {
         return result
     } catch (error){
         throw (error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw (err);
-            }
-        }
-    }
+    } 
 }
 
 const getById = async function (con, params) {
@@ -52,15 +44,7 @@ const getById = async function (con, params) {
         }
     } catch (error){
         throw(error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw(err);
-            }
-        }
-    }
+    } 
 }
 
 const delById = async function (con, params) {
@@ -76,15 +60,7 @@ const delById = async function (con, params) {
         }
     } catch (error){
         throw(error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw(err);
-            }
-        }
-    }
+    } 
 }
 
 

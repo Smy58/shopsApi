@@ -12,12 +12,21 @@ module.exports.getAllOrderPosition = async function (req, res, next) {
         params.orderId = req.query.orderId
     }
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await orderPositionsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -25,24 +34,42 @@ module.exports.getAllOrderPosition = async function (req, res, next) {
 module.exports.getOrderPositionById = async function (req, res, next) {
     const params = { orderPositionId: req.params.orderPositionId};
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await orderPositionsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
 module.exports.delOrderPositionById = async function (req, res, next) {
     const params = { orderPositionId: req.params.orderPositionId};
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await orderPositionsDbService.delById(con, params);
         res.status(200).json({ message: `OrderPosition ${req.params.orderPositionId} deleted` });
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 

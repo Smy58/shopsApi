@@ -11,12 +11,21 @@ module.exports.getAllProducts = async function (req, res, next) {
         params.groupId = req.query.groupId
     }
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await productsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -37,12 +46,21 @@ module.exports.createProduct = async function (req, res, next) {
         groupId
     };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await productsDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -50,23 +68,41 @@ module.exports.createProduct = async function (req, res, next) {
 module.exports.getProductById = async function (req, res, next) {
     const params = { productId: req.params.productId };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await productsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
 module.exports.delProductById = async function (req, res, next) {
     const params = { productId: req.params.productId };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await productsDbService.delById(con, params);
         res.status(200).json({ message: `Product ${req.params.productId} deleted` });
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };

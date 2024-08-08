@@ -23,46 +23,26 @@ const getAll = async function (con, params, page) {
         return result
     } catch (error){
         throw (error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw (err);
-            }
-        }
-    }
+    } 
 }
 
 const createItem = async function (con, params) {
     const query = insertQuery;
+    const newItemQuery = getAddedItemQuery
     
     try {
         const result = await con.execute(query, params, {});
         
-        const newItemQuery = getAddedItemQuery
+        const newItemData = await con.execute(newItemQuery, { lastRowid: result.lastRowid }, {});
 
-        try {
-            const newItemData = await con.execute(newItemQuery, { lastRowid: result.lastRowid }, {});
-
-            const newItemResult = Delivery(newItemData.rows[0])
-            
-            return newItemResult
-        } catch (err){
-            throw(err);
-        }
+        const newItemResult = Delivery(newItemData.rows[0])
+        
+        return newItemResult
+    
 
     } catch (error){
         throw(error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw(err);
-            }
-        }
-    }
+    } 
 }
 
 const getById = async function (con, params) {
@@ -79,15 +59,7 @@ const getById = async function (con, params) {
         }
     } catch (error){
         throw(error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw(err);
-            }
-        }
-    }
+    } 
 }
 
 const delById = async function (con, params) {
@@ -103,15 +75,7 @@ const delById = async function (con, params) {
         }
     } catch (error){
         throw(error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw(err);
-            }
-        }
-    }
+    } 
 }
 
 

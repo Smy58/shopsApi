@@ -13,12 +13,21 @@ module.exports.getAllContact = async function (req, res, next) {
         params.workerId = req.query.workerId
     }
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await contactsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -33,12 +42,21 @@ module.exports.createContact = async function (req, res, next) {
         phone
     };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await contactsDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -46,23 +64,41 @@ module.exports.createContact = async function (req, res, next) {
 module.exports.getContactById = async function (req, res, next) {
     const params = { contactId: req.params.contactId };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await contactsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
 module.exports.delContactById = async function (req, res, next) {
     const params = { contactId: req.params.contactId };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await contactsDbService.delById(con, params);
         res.status(200).json({ message: `Contact ${req.params.contactId} deleted` });
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };

@@ -21,12 +21,21 @@ module.exports.getAllOrder = async function (req, res, next) {
     }
 
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await ordersDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -48,12 +57,21 @@ module.exports.createOrder = async function (req, res, next) {
         clientId
     };
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await ordersDbService.createItem(con, params,positions);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
     
 };
@@ -62,24 +80,42 @@ module.exports.createOrder = async function (req, res, next) {
 module.exports.getOrderById = async function (req, res, next) {
     const params = { orderId: req.params.orderId};
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await ordersDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
 module.exports.delOrderById = async function (req, res, next) {
     
     const params = { orderId: req.params.orderId};
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await ordersDbService.delById(con, params);
         res.status(200).json({ message: `Order ${req.params.orderId} deleted` });
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };
 
@@ -90,11 +126,20 @@ module.exports.getPositionsByOrderId = async function (req, res, next) {
         params.orderId = req.query.orderId
     }
     
+    let con = undefined
     try {
         const con = await db_query.getCon()
         const result = await orderPositionsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
         next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
     }
 };

@@ -39,82 +39,59 @@ const getAll = async function (con, params, page) {
         return result
     } catch (error){
         throw (error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw (err);
-            }
-        }
-    }
+    } 
 }
 
 const createItem = async function (con, params, positions) {
     const answer = { order: {}, positions: [] }
     const query = insertQuery;
+    const newItemQuery = getAddedItemQuery
+    const addQuery = insertOrdPosQuery
+    const newOrdPosQuery = getByOrderIdQuery;
     
     try {
         const result = await con.execute(query, params, {});
         
-        const newItemQuery = getAddedItemQuery
+        const newItemData = await con.execute(newItemQuery, { lastRowid: result.lastRowid }, {});
+
+        const newItemResult = Order(newItemData.rows[0])
+        
+        answer.order = newItemResult
+
+        let inp = []
+        positions.forEach(async function (element) {
+            inp.push({
+                orderId: newItemResult.id,
+                positionId: element.positionId,
+                count: element.count
+            })
+        });
         
 
-        try {
-            const newItemData = await con.execute(newItemQuery, { lastRowid: result.lastRowid }, {});
+        const options = {
+            autoCommit: true,
+            bindDefs: {
+                orderId: { type: oracledb.NUMBER },
+                positionId: { type: oracledb.NUMBER },
+                count: { type: oracledb.NUMBER }
+            }
+        };
 
-            const newItemResult = Order(newItemData.rows[0])
-            
-            answer.order = newItemResult
+        const ordPosResult = await con.executeMany(addQuery, inp, options);
 
-            let inp = []
-            positions.forEach(async function (element) {
-                inp.push({
-                    orderId: newItemResult.id,
-                    positionId: element.positionId,
-                    count: element.count
-                })
-            });
-            
+        const newOrdPosData = await con.execute(newOrdPosQuery, { orderId: newItemResult.id}, {});
 
-            const options = {
-                autoCommit: true,
-                bindDefs: {
-                    orderId: { type: oracledb.NUMBER },
-                    positionId: { type: oracledb.NUMBER },
-                    count: { type: oracledb.NUMBER }
-                }
-            };
+        const newOrdPosResult = newOrdPosData.rows.map(obj => {
+            return OrderPosition(obj)
+        })
 
-            const addQuery = insertOrdPosQuery
+        answer.positions = await newOrdPosResult;
 
-            const ordPosResult = await con.executeMany(addQuery, inp, options);
-
-            const newOrdPosQuery = getByOrderIdQuery;
-            const newOrdPosData = await con.execute(newOrdPosQuery, { orderId: newItemResult.id}, {});
-
-            const newOrdPosResult = newOrdPosData.rows.map(obj => {
-                return OrderPosition(obj)
-            })
-
-            answer.positions = await newOrdPosResult;
-
-            return answer
-        } catch (err){
-            throw(err);
-        }
+        return answer
 
     } catch (error){
         throw(error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw(err);
-            }
-        }
-    }
+    } 
 }
 
 const getById = async function (con, params) {
@@ -131,15 +108,7 @@ const getById = async function (con, params) {
         }
     } catch (error){
         throw(error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw(err);
-            }
-        }
-    }
+    } 
 }
 
 const delById = async function (con, params) {
@@ -159,15 +128,7 @@ const delById = async function (con, params) {
         }
     } catch (error){
         throw(error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw(err);
-            }
-        }
-    }
+    } 
 }
 
 
