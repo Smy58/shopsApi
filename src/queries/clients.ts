@@ -4,6 +4,8 @@ export const getClients = `cl.id as client_id,
     cl.phone as client_phone, 
     cl.mail as client_mail`
 
+export const paginationQuery = ` order by cl.id asc OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`
+
 export const clientsQueryGet = `select
     ${getClients}
 from client cl`
@@ -17,4 +19,3 @@ export const getByIdQuery = clientsQueryGet + ` where cl.id = :clientId`
 
 export const deleteByIdQuery = `delete from client where id = :clientId`
 
-export const paginationQuery = ` order by cl.id asc OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`

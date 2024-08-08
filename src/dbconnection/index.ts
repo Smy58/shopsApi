@@ -11,7 +11,7 @@ const exec =  async function (query, params, options) {
         
         return result;
     } catch (error){
-        console.log(error);
+        throw (error);
     } finally {
         if (con) {
             try {
@@ -20,6 +20,16 @@ const exec =  async function (query, params, options) {
                 throw (err);
             }
         }
+    }
+}
+
+const getCon = async function () {
+    let con = undefined
+    try{
+        con = await oracledb.getConnection();
+        return con;
+    } catch (error){
+        console.log(error);
     }
 }
 
@@ -37,5 +47,6 @@ const execMany =  async function (query, params, options) {
 
 export default {
     exec,
-    execMany
+    execMany,
+    getCon
 }

@@ -23,5 +23,17 @@ async function initialize() {
     }
 }
 
+async function closePool() {
+    try {
+        console.log('close pool');
+        
+        await oracledb.getPool().close();
+
+    } catch  (err){
+        console.error(err.message);
+    }
+}
+
 module.exports.initialize = initialize;
+module.exports.closePool = closePool;
   

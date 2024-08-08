@@ -63,4 +63,16 @@ app.use((err, req, res, next) => {
   res.send({ message: err.message });
 });
 
-app.listen(PORT, () => console.log(`Running on port ${PORT}`));
+const server = app.listen(PORT, () => console.log(`Running on port ${PORT}`));
+
+// process.on('SIGTERM', closeServer)
+
+process.on('SIGINT', closeServer)
+
+async function closeServer() {
+  console.log('Received kill signal, shutting down gracefully')
+  server.close(() => {
+    console.log('HTTP server closed')
+    database.closePool()
+  })
+}

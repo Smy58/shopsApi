@@ -1,32 +1,20 @@
 import db_query from '../dbconnection';
-import Role from '../models/role';
-import { NotFoundError } from '../errors/not-found-err'
-
-import { rolesQueryGet, insertQuery, getAddedItemQuery, getByIdQuery, deleteByIdQuery, paginationQuery } from '../queries/roles'
+import rolesDbService from '../services/oracleDB/roles'
 
 const maxnumrows = 20;
 let offset = 0;
 
 
 module.exports.getAllRole = async function (req, res, next) {
-    let query = rolesQueryGet;
-    
-    query += paginationQuery;
-    
-    if (req.query.page) {
-        offset = (req.query.page - 1) * maxnumrows
-    }
-    
     const params = { offset, maxnumrows };
-    const options = { prefetchRows: maxnumrows + 1, fetchArraySize: maxnumrows };
     
-    const data = await db_query.exec(query, params, options);
-
-    const result = data.rows.map(obj => {
-        return Role(obj)
-    })
-    
-    res.status(200).json(result);
+    try {
+        const con = await db_query.getCon()
+        const result = await rolesDbService.getAll(con, params, req.query.page)
+        res.status(200).json(result);
+    } catch (error){
+        next(error);
+    }
 };
 
 module.exports.createRole = async function (req, res, next) {
@@ -34,58 +22,41 @@ module.exports.createRole = async function (req, res, next) {
         name
     } = req.body;
 
-    const query = insertQuery;
-    
     const params = {
         name
     };
     
-    const result = await db_query.exec(query, params, {});
-    
-    if (result?.lastRowid) {
-        const newItemQuery = getAddedItemQuery
-        const newItemData = await db_query.exec(newItemQuery, { lastRowid: result.lastRowid }, {});
-
-        const newItemResult = Role(newItemData.rows[0])
-        
-        res.status(200).json(newItemResult);
-
-    } else {
-        res.status(501).json({});
+    try {
+        const con = await db_query.getCon()
+        const result = await rolesDbService.createItem(con, params);
+        res.status(200).json(result);
+    } catch (error){
+        next(error);
     }
 };
 
 
 module.exports.getRoleById = async function (req, res, next) {
-    const query = getByIdQuery;
     const params = { roleId: req.params.roleId};
     
-    const data = await db_query.exec(query, params, {});
-
-    
-    
-    if (data.rows.length == 0) {
-        next(new NotFoundError('Role not found'))
-    } else {
-        const result = Role(data.rows[0])
-
+    try {
+        const con = await db_query.getCon()
+        const result = await rolesDbService.getById(con, params);
         res.status(200).json(result);
+    } catch (error){
+        next(error);
     }
 };
 
 module.exports.delRoleById = async function (req, res, next) {
-    const query = deleteByIdQuery;
     const params = { roleId: req.params.roleId};
     
     
-    const result = await db_query.exec(query, params, {});
-    
-    
-    if (result.rowsAffected == 0) {
-
-        next(new NotFoundError('Role not found'));
-
-    } else {
-        res.status(200).json({ message: `Role ${req.params.roleId} deleted` });
+    try {
+        const con = await db_query.getCon()
+        const result = await rolesDbService.delById(con, params);
+        res.status(200).json({ message: `Role ${req.params.clientId} deleted` });
+    } catch (error){
+        next(error);
     }
 };
