@@ -2,8 +2,9 @@ import { NotFoundError } from "../../errors/not-found-err";
 import Client from "../../models/client";
 import { clientsQueryGet, deleteByIdQuery, getAddedItemQuery, getByIdQuery, insertQuery, paginationQuery } from "../../queries/clients";
 
+import oracledb from 'oracledb'
 
-const getAll = async function (con, params, page) {
+const getAll = async function (con: oracledb.Connection, params: {[k: string]: any}, page: number) {
     let query = clientsQueryGet;
     
     query += paginationQuery;
@@ -11,8 +12,6 @@ const getAll = async function (con, params, page) {
     if (page) {
         params.offset = (page - 1) * params.maxnumrows
     }
-    
-    
     
     const options = { prefetchRows: params.maxnumrows + 1, fetchArraySize: params.maxnumrows };
     
@@ -28,7 +27,7 @@ const getAll = async function (con, params, page) {
     } 
 }
 
-const createItem = async function (con, params) {
+const createItem = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = insertQuery;
     const newItemQuery = getAddedItemQuery
     
@@ -47,7 +46,7 @@ const createItem = async function (con, params) {
     } 
 }
 
-const getById = async function (con, params) {
+const getById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = getByIdQuery;
     
     try {
@@ -64,7 +63,7 @@ const getById = async function (con, params) {
     } 
 }
 
-const delById = async function (con, params) {
+const delById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = deleteByIdQuery;
     
     try {

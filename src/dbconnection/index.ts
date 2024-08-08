@@ -1,30 +1,10 @@
-const oracledb = require('oracledb');
-oracledb.outFormat = oracledb.OBJECT;
+import oracledb from 'oracledb';
+oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
 oracledb.autoCommit = true;
 
 
-const exec =  async function (query, params, options) {
-    let con = undefined
-    try{
-        con = await oracledb.getConnection();
-        let result = await con.execute(query,params, options);
-        
-        return result;
-    } catch (error){
-        throw (error);
-    } finally {
-        if (con) {
-            try {
-                await con.close();
-            } catch (err) {
-                throw (err);
-            }
-        }
-    }
-}
-
 const getCon = async function () {
-    let con = undefined
+    let con: oracledb.Connection = undefined
     try{
         con = await oracledb.getConnection();
         return con;
@@ -33,20 +13,6 @@ const getCon = async function () {
     }
 }
 
-const execMany =  async function (query, params, options) {
-    let con = undefined
-    try{
-        con = await oracledb.getConnection();
-        let result = await con.executeMany(query, params, options);
-        
-        return result;
-    }catch (error){
-        console.log(error);
-    }
-}
-
 export default {
-    exec,
-    execMany,
     getCon
 }

@@ -1,9 +1,10 @@
 import { NotFoundError } from "../../errors/not-found-err";
 import Worker from "../../models/worker";
 import { workersQueryGet, deleteByIdQuery, getAddedItemQuery, getByIdQuery, insertQuery, paginationQuery } from "../../queries/workers";
+import oracledb from 'oracledb'
 
 
-const getAll = async function (con, params, page) {
+const getAll = async function (con: oracledb.Connection, params: {[k: string]: any}, page: number) {
     let query = workersQueryGet;
 
     if (params.roleId || params.shopId) {
@@ -39,7 +40,7 @@ const getAll = async function (con, params, page) {
     } 
 }
 
-const createItem = async function (con, params) {
+const createItem = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = insertQuery;
     const newItemQuery = getAddedItemQuery
     
@@ -58,7 +59,7 @@ const createItem = async function (con, params) {
     } 
 }
 
-const getById = async function (con, params) {
+const getById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = getByIdQuery;
     
     try {
@@ -75,7 +76,7 @@ const getById = async function (con, params) {
     } 
 }
 
-const delById = async function (con, params) {
+const delById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = deleteByIdQuery;
     
     try {

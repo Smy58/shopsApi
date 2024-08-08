@@ -6,7 +6,7 @@ import OrderPosition from "../../models/orderPosition";
 import oracledb from 'oracledb';
 
 
-const getAll = async function (con, params, page) {
+const getAll = async function (con: oracledb.Connection, params: {[k: string]: any}, page: number) {
     let query = ordersQueryGet;
     
     if (params.clientId || params.statusId) {
@@ -42,7 +42,7 @@ const getAll = async function (con, params, page) {
     } 
 }
 
-const createItem = async function (con, params, positions) {
+const createItem = async function (con: oracledb.Connection, params: {[k: string]: any}, positions: [{positionId: number, count: number}]) {
     const answer = { order: {}, positions: [] }
     const query = insertQuery;
     const newItemQuery = getAddedItemQuery
@@ -94,7 +94,7 @@ const createItem = async function (con, params, positions) {
     } 
 }
 
-const getById = async function (con, params) {
+const getById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = getByIdQuery;
     
     try {
@@ -111,7 +111,7 @@ const getById = async function (con, params) {
     } 
 }
 
-const delById = async function (con, params) {
+const delById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = deleteByIdQuery;
     
     try {

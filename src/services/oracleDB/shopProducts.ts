@@ -1,9 +1,10 @@
 import { NotFoundError } from "../../errors/not-found-err";
 import ShopProduct from "../../models/shopProduct";
 import { shopProductsQueryGet, deleteByIdQuery, getAddedItemQuery, getByIdQuery, insertQuery, paginationQuery } from "../../queries/shopProducts";
+import oracledb from 'oracledb'
 
 
-const getAll = async function (con, params, page) {
+const getAll = async function (con: oracledb.Connection, params: {[k: string]: any}, page: number) {
     let query = shopProductsQueryGet;
     
     if (params.shopId) {
@@ -30,7 +31,7 @@ const getAll = async function (con, params, page) {
     } 
 }
 
-const createItem = async function (con, params) {
+const createItem = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = insertQuery;
     const newItemQuery = getAddedItemQuery
     
@@ -49,7 +50,7 @@ const createItem = async function (con, params) {
     } 
 }
 
-const getById = async function (con, params) {
+const getById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = getByIdQuery;
     
     try {
@@ -66,7 +67,7 @@ const getById = async function (con, params) {
     } 
 }
 
-const delById = async function (con, params) {
+const delById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
     const query = deleteByIdQuery;
     
     try {
