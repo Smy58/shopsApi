@@ -54,7 +54,7 @@ module.exports.delDeliveryById = async function (req, res, next) {
     try {
         const con = await db_query.getCon()
         const result = await deliveriesDbService.delById(con, params);
-        res.status(200).json({ message: `Delivery ${req.params.clientId} deleted` });
+        res.status(200).json({ message: `Delivery ${req.params.deliveryId} deleted` });
     } catch (error){
         next(error);
     }

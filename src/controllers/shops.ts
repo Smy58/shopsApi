@@ -64,7 +64,7 @@ module.exports.delShopById = async function (req, res, next) {
     try {
         const con = await db_query.getCon()
         const result = await shopsDbService.delById(con, params);
-        res.status(200).json({ message: `Shop ${req.params.clientId} deleted` });
+        res.status(200).json({ message: `Shop ${req.params.shopId} deleted` });
     } catch (error){
         next(error);
     }

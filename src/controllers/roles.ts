@@ -55,7 +55,7 @@ module.exports.delRoleById = async function (req, res, next) {
     try {
         const con = await db_query.getCon()
         const result = await rolesDbService.delById(con, params);
-        res.status(200).json({ message: `Role ${req.params.clientId} deleted` });
+        res.status(200).json({ message: `Role ${req.params.roleId} deleted` });
     } catch (error){
         next(error);
     }

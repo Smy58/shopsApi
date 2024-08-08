@@ -1,5 +1,5 @@
 import db_query from '../dbconnection';
-import statusesDbService from '../services/oracleDB/statuses'
+import workersDbService from '../services/oracleDB/workers'
 
 const maxnumrows = 20;
 let offset = 0;
@@ -17,7 +17,7 @@ module.exports.getAllWorker = async function (req, res, next) {
     
     try {
         const con = await db_query.getCon()
-        const result = await statusesDbService.getAll(con, params, req.query.page)
+        const result = await workersDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
         next(error);
@@ -39,7 +39,7 @@ module.exports.createWorker = async function (req, res, next) {
     
     try {
         const con = await db_query.getCon()
-        const result = await statusesDbService.createItem(con, params);
+        const result = await workersDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
@@ -52,7 +52,7 @@ module.exports.getWorkerById = async function (req, res, next) {
     
     try {
         const con = await db_query.getCon()
-        const result = await statusesDbService.getById(con, params);
+        const result = await workersDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
         next(error);
@@ -64,8 +64,8 @@ module.exports.delWorkerById = async function (req, res, next) {
     
     try {
         const con = await db_query.getCon()
-        const result = await statusesDbService.delById(con, params);
-        res.status(200).json({ message: `Worker ${req.params.clientId} deleted` });
+        const result = await workersDbService.delById(con, params);
+        res.status(200).json({ message: `Worker ${req.params.workerId} deleted` });
     } catch (error){
         next(error);
     }

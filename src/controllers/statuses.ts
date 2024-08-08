@@ -52,7 +52,7 @@ module.exports.delStatusById = async function (req, res, next) {
     try {
         const con = await db_query.getCon()
         const result = await statusesDbService.delById(con, params);
-        res.status(200).json({ message: `Status ${req.params.clientId} deleted` });
+        res.status(200).json({ message: `Status ${req.params.statusId} deleted` });
     } catch (error){
         next(error);
     }

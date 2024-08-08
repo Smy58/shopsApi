@@ -40,7 +40,7 @@ module.exports.delOrderPositionById = async function (req, res, next) {
     try {
         const con = await db_query.getCon()
         const result = await orderPositionsDbService.delById(con, params);
-        res.status(200).json({ message: `OrderPosition ${req.params.clientId} deleted` });
+        res.status(200).json({ message: `OrderPosition ${req.params.orderPositionId} deleted` });
     } catch (error){
         next(error);
     }

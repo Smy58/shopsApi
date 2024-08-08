@@ -61,7 +61,7 @@ module.exports.delContactById = async function (req, res, next) {
     try {
         const con = await db_query.getCon()
         const result = await contactsDbService.delById(con, params);
-        res.status(200).json({ message: `Contact ${req.params.clientId} deleted` });
+        res.status(200).json({ message: `Contact ${req.params.contactId} deleted` });
     } catch (error){
         next(error);
     }
