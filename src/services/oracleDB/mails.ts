@@ -2,9 +2,10 @@ import { NotFoundError } from "../../errors/not-found-err";
 import Mail from "../../models/mail";
 import { mailsQueryGet, deleteByIdQuery, getAddedItemQuery, getByIdQuery, insertQuery, paginationQuery } from "../../queries/mails";
 import oracledb from 'oracledb'
+import { MailsParams } from '../../types/params'
 
 
-const getAll = async function (con: oracledb.Connection, params: {[k: string]: any}, page: number) {
+const getAll = async function (con: oracledb.Connection, params: MailsParams.getAll, page: number) {
     let query = mailsQueryGet;
     
     if (params.workerId) {
@@ -31,7 +32,7 @@ const getAll = async function (con: oracledb.Connection, params: {[k: string]: a
     } 
 }
 
-const createItem = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const createItem = async function (con: oracledb.Connection, params: MailsParams.create) {
     const query = insertQuery;
     const newItemQuery = getAddedItemQuery
     
@@ -49,7 +50,7 @@ const createItem = async function (con: oracledb.Connection, params: {[k: string
     } 
 }
 
-const getById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const getById = async function (con: oracledb.Connection, params: MailsParams.getById) {
     const query = getByIdQuery;
     
     try {
@@ -66,7 +67,7 @@ const getById = async function (con: oracledb.Connection, params: {[k: string]: 
     } 
 }
 
-const delById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const delById = async function (con: oracledb.Connection, params: MailsParams.getById) {
     const query = deleteByIdQuery;
     
     try {

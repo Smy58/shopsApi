@@ -1,19 +1,20 @@
+import OracleDB from 'oracledb';
 import db_query from '../dbconnection';
 import mailsDbService from '../services/oracleDB/mails'
-
+import { MailsParams } from '../types/params'
 const maxnumrows = 20;
 let offset = 0;
 
 module.exports.getAllMail = async function (req, res, next) {
-    const params: {[k: string]: any} = { offset, maxnumrows };
+    const params: MailsParams.getAll = { offset, maxnumrows };
 
     if (req.query.workerId) {
         params.workerId = req.query.workerId
     }
 
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await mailsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
@@ -35,14 +36,14 @@ module.exports.createMail = async function (req, res, next) {
         mail
     } = req.body;
 
-    const params = {
+    const params: MailsParams.create = {
         workerId, 
         mail
     };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await mailsDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -60,11 +61,11 @@ module.exports.createMail = async function (req, res, next) {
 
 
 module.exports.getMailById = async function (req, res, next) {
-    const params = { mailId: req.params.mailId };
+    const params: MailsParams.getById = { mailId: req.params.mailId };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await mailsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -81,11 +82,11 @@ module.exports.getMailById = async function (req, res, next) {
 };
 
 module.exports.delMailById = async function (req, res, next) {
-    const params = { mailId: req.params.mailId };
+    const params: MailsParams.getById = { mailId: req.params.mailId };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await mailsDbService.delById(con, params);
         res.status(200).json({ message: `Mail ${req.params.mailId} deleted` });
     } catch (error){

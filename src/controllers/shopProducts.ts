@@ -1,19 +1,21 @@
+import OracleDB from 'oracledb';
 import db_query from '../dbconnection';
 import shopProductsDbService from '../services/oracleDB/shopProducts'
+import { ShopProductsParams } from '../types/params'
 
 const maxnumrows = 20;
 let offset = 0;
 
 module.exports.getAllShopProduct = async function (req, res, next) {
-    const params: {[k: string]: any} = { offset, maxnumrows };
+    const params: ShopProductsParams.getAll = { offset, maxnumrows };
 
     if (req.query.shopId) {
         params.shopId = req.query.shopId
     }
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await shopProductsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
@@ -36,15 +38,15 @@ module.exports.createShopProducts = async function (req, res, next) {
         cost
     } = req.body;
 
-    const params = {
+    const params: ShopProductsParams.create = {
         shopId,
         productId,
         cost
     };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await shopProductsDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -62,11 +64,11 @@ module.exports.createShopProducts = async function (req, res, next) {
 
 
 module.exports.getShopProductById = async function (req, res, next) {
-    const params = { shopProductId: req.params.shopProductId};
+    const params: ShopProductsParams.getById = { shopProductId: req.params.shopProductId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await shopProductsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -83,11 +85,11 @@ module.exports.getShopProductById = async function (req, res, next) {
 };
 
 module.exports.delShopProductById = async function (req, res, next) {
-    const params = { shopProductId: req.params.shopProductId};
+    const params: ShopProductsParams.getById = { shopProductId: req.params.shopProductId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await shopProductsDbService.delById(con, params);
         res.status(200).json({ message: `ShopProduct ${req.params.shopProductId} deleted` });
     } catch (error){

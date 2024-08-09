@@ -1,20 +1,22 @@
 import db_query from '../dbconnection';
 import orderPositionsDbService from '../services/oracleDB/orderPositions'
 import { NotFoundError } from '../errors/not-found-err'
+import { OrederPositionsParams } from '../types/params'
+import OracleDB from 'oracledb';
 
 const maxnumrows = 20;
 let offset = 0;
 
 module.exports.getAllOrderPosition = async function (req, res, next) {
-    const params: {[k: string]: any} = { offset, maxnumrows };
+    const params: OrederPositionsParams.getAll = { offset, maxnumrows };
 
     if (req.query.orderId) {
         params.orderId = req.query.orderId
     }
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await orderPositionsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
@@ -32,11 +34,11 @@ module.exports.getAllOrderPosition = async function (req, res, next) {
 
 
 module.exports.getOrderPositionById = async function (req, res, next) {
-    const params = { orderPositionId: req.params.orderPositionId};
+    const params: OrederPositionsParams.getById = { orderPositionId: req.params.orderPositionId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await orderPositionsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -53,11 +55,11 @@ module.exports.getOrderPositionById = async function (req, res, next) {
 };
 
 module.exports.delOrderPositionById = async function (req, res, next) {
-    const params = { orderPositionId: req.params.orderPositionId};
+    const params: OrederPositionsParams.getById = { orderPositionId: req.params.orderPositionId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await orderPositionsDbService.delById(con, params);
         res.status(200).json({ message: `OrderPosition ${req.params.orderPositionId} deleted` });
     } catch (error){

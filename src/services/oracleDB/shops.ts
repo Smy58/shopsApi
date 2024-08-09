@@ -2,9 +2,10 @@ import { NotFoundError } from "../../errors/not-found-err";
 import Shop from "../../models/shop";
 import { shopsQueryGet, deleteByIdQuery, getAddedItemQuery, getByIdQuery, insertQuery, paginationQuery } from "../../queries/shops";
 import oracledb from 'oracledb'
+import { ShopsParams } from '../../types/params'
 
 
-const getAll = async function (con: oracledb.Connection, params: {[k: string]: any}, page: number) {
+const getAll = async function (con: oracledb.Connection, params: ShopsParams.getAll, page: number) {
     let query = shopsQueryGet;
     
     query += paginationQuery;
@@ -27,7 +28,7 @@ const getAll = async function (con: oracledb.Connection, params: {[k: string]: a
     } 
 }
 
-const createItem = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const createItem = async function (con: oracledb.Connection, params: ShopsParams.create) {
     const query = insertQuery;
     const newItemQuery = getAddedItemQuery
     
@@ -46,7 +47,7 @@ const createItem = async function (con: oracledb.Connection, params: {[k: string
     } 
 }
 
-const getById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const getById = async function (con: oracledb.Connection, params: ShopsParams.getById) {
     const query = getByIdQuery;
     
     try {
@@ -63,7 +64,7 @@ const getById = async function (con: oracledb.Connection, params: {[k: string]: 
     } 
 }
 
-const delById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const delById = async function (con: oracledb.Connection, params: ShopsParams.getById) {
     const query = deleteByIdQuery;
     
     try {

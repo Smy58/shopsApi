@@ -1,11 +1,12 @@
+import OracleDB from 'oracledb';
 import db_query from '../dbconnection';
 import workersDbService from '../services/oracleDB/workers'
-
+import { WorkersParams } from '../types/params'
 const maxnumrows = 20;
 let offset = 0;
 
 module.exports.getAllWorker = async function (req, res, next) {
-    const params: {[k: string]: any} = { offset, maxnumrows };
+    const params: WorkersParams.getAll = { offset, maxnumrows };
 
     if (req.query.roleId) {
         params.roleId = req.query.roleId
@@ -15,9 +16,9 @@ module.exports.getAllWorker = async function (req, res, next) {
         params.shopId = req.query.shopId
     }
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await workersDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
@@ -40,15 +41,15 @@ module.exports.createWorker = async function (req, res, next) {
         roleId
     } = req.body;
 
-    const params = {
+    const params: WorkersParams.create = {
         name, 
         shopId, 
         roleId
     };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await workersDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -66,11 +67,11 @@ module.exports.createWorker = async function (req, res, next) {
 
 
 module.exports.getWorkerById = async function (req, res, next) {
-    const params = { workerId: req.params.workerId};
+    const params: WorkersParams.getById = { workerId: req.params.workerId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await workersDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -87,11 +88,11 @@ module.exports.getWorkerById = async function (req, res, next) {
 };
 
 module.exports.delWorkerById = async function (req, res, next) {
-    const params = { workerId: req.params.workerId};
+    const params: WorkersParams.getById = { workerId: req.params.workerId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await workersDbService.delById(con, params);
         res.status(200).json({ message: `Worker ${req.params.workerId} deleted` });
     } catch (error){

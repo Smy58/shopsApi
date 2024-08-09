@@ -2,8 +2,10 @@ import { NotFoundError } from "../../errors/not-found-err";
 import OrderPosition from "../../models/orderPosition";
 import { orderPositionsQueryGet, deleteByIdQuery, getByIdQuery, paginationQuery } from "../../queries/orderPositions";
 import oracledb from 'oracledb'
+import { OrederPositionsParams } from '../../types/params'
 
-const getAll = async function (con: oracledb.Connection, params: {[k: string]: any}, page: number) {
+
+const getAll = async function (con: oracledb.Connection, params: OrederPositionsParams.getAll, page: number) {
     let query = orderPositionsQueryGet;
     
     if (params.workerId) {
@@ -31,7 +33,7 @@ const getAll = async function (con: oracledb.Connection, params: {[k: string]: a
     } 
 }
 
-const getById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const getById = async function (con: oracledb.Connection, params: OrederPositionsParams.getById) {
     const query = getByIdQuery;
     
     try {
@@ -48,7 +50,7 @@ const getById = async function (con: oracledb.Connection, params: {[k: string]: 
     } 
 }
 
-const delById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const delById = async function (con: oracledb.Connection, params: OrederPositionsParams.getById) {
     const query = deleteByIdQuery;
     
     try {

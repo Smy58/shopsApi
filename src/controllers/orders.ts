@@ -1,14 +1,15 @@
+import OracleDB from 'oracledb';
 import db_query from '../dbconnection';
 import orderPositionsDbService from '../services/oracleDB/orderPositions'
 import ordersDbService from '../services/oracleDB/orders'
-
+import { OrdersParams, OrederPositionsParams } from '../types/params'
 
 const maxnumrows = 20;
 let offset = 0;
 
 
 module.exports.getAllOrder = async function (req, res, next) {
-    const params: {[k: string]: any} = { offset, maxnumrows };
+    const params: OrdersParams.getAll = { offset, maxnumrows };
 
     if (req.query.clientId || req.query.statusId) {
         if (req.query.clientId) {
@@ -21,9 +22,9 @@ module.exports.getAllOrder = async function (req, res, next) {
     }
 
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await ordersDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
@@ -45,11 +46,12 @@ module.exports.createOrder = async function (req, res, next) {
         shopId,
         statusId,
         deliveryId,
-        clientId,
-        positions
+        clientId
     } = req.body;
 
-    const params = {
+    const positions: OrederPositionsParams.create[] = req.body.positions
+
+    const params: OrdersParams.create = {
         totalCost,
         shopId,
         statusId,
@@ -57,10 +59,10 @@ module.exports.createOrder = async function (req, res, next) {
         clientId
     };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
-        const result = await ordersDbService.createItem(con, params,positions);
+        con = await db_query.getCon()
+        const result = await ordersDbService.createItem(con, params, positions);
         res.status(200).json(result);
     } catch (error){
         next(error);
@@ -78,11 +80,11 @@ module.exports.createOrder = async function (req, res, next) {
 
 
 module.exports.getOrderById = async function (req, res, next) {
-    const params = { orderId: req.params.orderId};
+    const params: OrdersParams.getById = { orderId: req.params.orderId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await ordersDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -100,10 +102,10 @@ module.exports.getOrderById = async function (req, res, next) {
 
 module.exports.delOrderById = async function (req, res, next) {
     
-    const params = { orderId: req.params.orderId};
-    let con = undefined
+    const params: OrdersParams.getById = { orderId: req.params.orderId};
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await ordersDbService.delById(con, params);
         res.status(200).json({ message: `Order ${req.params.orderId} deleted` });
     } catch (error){
@@ -120,15 +122,15 @@ module.exports.delOrderById = async function (req, res, next) {
 };
 
 module.exports.getPositionsByOrderId = async function (req, res, next) {
-    const params: {[k: string]: any} = { offset, maxnumrows };
+    const params: OrederPositionsParams.getAll = { offset, maxnumrows };
 
     if (req.query.orderId) {
         params.orderId = req.query.orderId
     }
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await orderPositionsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){

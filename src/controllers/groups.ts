@@ -1,15 +1,18 @@
+import OracleDB from 'oracledb';
 import db_query from '../dbconnection';
 import groupsDbService from '../services/oracleDB/groups'
+
+import { GroupsParams } from '../types/params'
 
 const maxnumrows = 20;
 let offset = 0;
 
 module.exports.getAllGroup = async function (req, res, next) {
-    const params = { offset, maxnumrows };
+    const params: GroupsParams.getAll = { offset, maxnumrows };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await groupsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
@@ -30,13 +33,13 @@ module.exports.createGroup = async function (req, res, next) {
         name
     } = req.body;
 
-    const params = {
+    const params: GroupsParams.create = {
         name
     };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await groupsDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -54,11 +57,11 @@ module.exports.createGroup = async function (req, res, next) {
 
 
 module.exports.getGroupById = async function (req, res, next) {
-    const params = { groupId: req.params.groupId};
+    const params: GroupsParams.getById = { groupId: req.params.groupId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await groupsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -75,11 +78,11 @@ module.exports.getGroupById = async function (req, res, next) {
 };
 
 module.exports.delGroupById = async function (req, res, next) {
-    const params = { groupId: req.params.groupId};
+    const params: GroupsParams.getById = { groupId: req.params.groupId};
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await groupsDbService.delById(con, params);
         res.status(200).json({ message: `Group ${req.params.groupId} deleted` });
     } catch (error){

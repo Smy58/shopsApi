@@ -3,8 +3,9 @@ import Client from "../../models/client";
 import { clientsQueryGet, deleteByIdQuery, getAddedItemQuery, getByIdQuery, insertQuery, paginationQuery } from "../../queries/clients";
 
 import oracledb from 'oracledb'
+import { ClientParams } from '../../types/params'
 
-const getAll = async function (con: oracledb.Connection, params: {[k: string]: any}, page: number) {
+const getAll = async function (con: oracledb.Connection, params: ClientParams.getAll, page: number) {
     let query = clientsQueryGet;
     
     query += paginationQuery;
@@ -27,7 +28,7 @@ const getAll = async function (con: oracledb.Connection, params: {[k: string]: a
     } 
 }
 
-const createItem = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const createItem = async function (con: oracledb.Connection, params: ClientParams.create) {
     const query = insertQuery;
     const newItemQuery = getAddedItemQuery
     
@@ -46,7 +47,7 @@ const createItem = async function (con: oracledb.Connection, params: {[k: string
     } 
 }
 
-const getById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const getById = async function (con: oracledb.Connection, params: ClientParams.getById) {
     const query = getByIdQuery;
     
     try {
@@ -63,7 +64,7 @@ const getById = async function (con: oracledb.Connection, params: {[k: string]: 
     } 
 }
 
-const delById = async function (con: oracledb.Connection, params: {[k: string]: any}) {
+const delById = async function (con: oracledb.Connection, params: ClientParams.getById) {
     const query = deleteByIdQuery;
     
     try {

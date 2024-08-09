@@ -1,21 +1,22 @@
+import OracleDB from 'oracledb';
 import db_query from '../dbconnection';
 import contactsDbService from '../services/oracleDB/contacts'
-
+import { ContactsParams } from '../types/params'
 
 const maxnumrows = 20;
 let offset = 0;
 
 module.exports.getAllContact = async function (req, res, next) {
 
-    const params: {[k: string]: any} = { offset, maxnumrows };
+    const params: ContactsParams.getAll = { offset, maxnumrows };
 
     if (req.query.workerId) {
         params.workerId = req.query.workerId
     }
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await contactsDbService.getAll(con, params, req.query.page)
         res.status(200).json(result);
     } catch (error){
@@ -37,14 +38,14 @@ module.exports.createContact = async function (req, res, next) {
         phone
     } = req.body;
 
-    const params = {
+    const params: ContactsParams.create = {
         workerId, 
         phone
     };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await contactsDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -62,11 +63,11 @@ module.exports.createContact = async function (req, res, next) {
 
 
 module.exports.getContactById = async function (req, res, next) {
-    const params = { contactId: req.params.contactId };
+    const params: ContactsParams.getById = { contactId: req.params.contactId };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await contactsDbService.getById(con, params);
         res.status(200).json(result);
     } catch (error){
@@ -83,11 +84,11 @@ module.exports.getContactById = async function (req, res, next) {
 };
 
 module.exports.delContactById = async function (req, res, next) {
-    const params = { contactId: req.params.contactId };
+    const params: ContactsParams.getById = { contactId: req.params.contactId };
     
-    let con = undefined
+    let con: OracleDB.Connection = undefined
     try {
-        const con = await db_query.getCon()
+        con = await db_query.getCon()
         const result = await contactsDbService.delById(con, params);
         res.status(200).json({ message: `Contact ${req.params.contactId} deleted` });
     } catch (error){
