@@ -1,11 +1,12 @@
 import OracleDB = require("oracledb")
 
+interface ParamsGetAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
+    offset: number, 
+    maxnumrows: number,
+}
+
 declare namespace ClientParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
-        
-    }
+    interface getAll extends ParamsGetAll {}
 
     interface create extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
         name: string,
@@ -20,9 +21,7 @@ declare namespace ClientParams{
 }
 
 declare namespace ContactsParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
+    interface getAll extends ParamsGetAll {
         workerId?: number
     }
 
@@ -37,10 +36,7 @@ declare namespace ContactsParams{
 }
 
 declare namespace DeliveriesParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number
-    }
+    interface getAll extends ParamsGetAll {}
 
     interface create extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
         workerId: number
@@ -52,10 +48,7 @@ declare namespace DeliveriesParams{
 }
 
 declare namespace GroupsParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number
-    }
+    interface getAll extends ParamsGetAll {}
 
     interface create extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
         name: string
@@ -67,9 +60,7 @@ declare namespace GroupsParams{
 }
 
 declare namespace MailsParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
+    interface getAll extends ParamsGetAll {
         workerId?: number
     }
 
@@ -85,9 +76,7 @@ declare namespace MailsParams{
 
 
 declare namespace OrederPositionsParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
+    interface getAll extends ParamsGetAll {
         orderId?: number
     }
 
@@ -103,9 +92,7 @@ declare namespace OrederPositionsParams{
 }
 
 declare namespace OrdersParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
+    interface getAll extends ParamsGetAll {
         clientId?: number,
         statusId?: number,
     }
@@ -125,9 +112,7 @@ declare namespace OrdersParams{
 
 
 declare namespace ProductsParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
+    interface getAll extends ParamsGetAll {
         groupId?: number
     }
 
@@ -146,10 +131,7 @@ declare namespace ProductsParams{
 }
 
 declare namespace RolesParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
-    }
+    interface getAll extends ParamsGetAll {}
 
     interface create extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
         name: string
@@ -162,9 +144,7 @@ declare namespace RolesParams{
 }
 
 declare namespace ShopProductsParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
+    interface getAll extends ParamsGetAll {
         shopId?: number
     }
 
@@ -181,10 +161,7 @@ declare namespace ShopProductsParams{
 
 
 declare namespace ShopsParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number
-    }
+    interface getAll extends ParamsGetAll {}
 
     interface create extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
         name: string, 
@@ -201,10 +178,7 @@ declare namespace ShopsParams{
 }
 
 declare namespace StatusesParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number
-    }
+    interface getAll extends ParamsGetAll {}
 
     interface create extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
         name: string
@@ -216,9 +190,7 @@ declare namespace StatusesParams{
 }
 
 declare namespace WorkersParams{
-    interface getAll extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
-        offset: number, 
-        maxnumrows: number,
+    interface getAll extends ParamsGetAll {
         roleId?: number,
         shopId?: number
     }
