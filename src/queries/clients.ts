@@ -10,12 +10,33 @@ export const clientsQueryGet = `select
     ${getClients}
 from client cl`
 
-export const insertQuery = `insert into client (name, address, phone, mail) values 
-(:name, :address, :phone, :mail)`
+export const clientLoginQueryGet = `select
+    ${getClients},
+    cl.password as password
+from client cl`
+
+export const updateQuery = `UPDATE client
+SET 
+    name = :name,
+    address = :address,
+    phone = :phone,
+    mail = :mail,
+    update_client = sysdate
+where id = :clientId`
+
+export const updatePasswordQuery = `UPDATE client
+SET 
+    password = :newPassword,
+    update_client = sysdate
+where id = :clientId`
+
+export const insertQuery = `insert into client (name, address, phone, mail, password) values 
+(:name, :address, :phone, :mail, :password)`
 
 export const getAddedItemQuery = clientsQueryGet + ` where cl.rowid = :lastRowid`
 
 export const getByIdQuery = clientsQueryGet + ` where cl.id = :clientId`
+export const getPassByIdQuery = clientLoginQueryGet + ` where cl.id = :clientId`
 
 export const deleteByIdQuery = `delete from client where id = :clientId`
 

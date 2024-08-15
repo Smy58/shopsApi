@@ -52,7 +52,11 @@ const createItem = async function (con: oracledb.Connection, params: OrdersParam
     const newOrdPosQuery = getByOrderIdQuery;
     
     try {
+        console.log('CREATE ORDER');
+
         const result = await con.execute(query, params, {});
+        
+        console.log('GET ORDER POSITIONS');
         
         const newItemData = await con.execute(newItemQuery, { lastRowid: result.lastRowid }, {});
 
@@ -79,7 +83,11 @@ const createItem = async function (con: oracledb.Connection, params: OrdersParam
             }
         };
 
+        console.log('CREATE ORDER POSITIONS');
+
         const ordPosResult = await con.executeMany(addQuery, inp, options);
+
+        console.log('GET ORDER POSITIONS');
 
         const newOrdPosData = await con.execute(newOrdPosQuery, { orderId: newItemResult.id}, {});
 

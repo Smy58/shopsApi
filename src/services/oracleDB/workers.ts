@@ -44,9 +44,10 @@ const getAll = async function (con: oracledb.Connection, params: WorkersParams.g
 const createItem = async function (con: oracledb.Connection, params: WorkersParams.create) {
     const query = insertQuery;
     const newItemQuery = getAddedItemQuery
-    
+
     try {
         const result = await con.execute(query, params, {});
+
         
         const newItemData = await con.execute(newItemQuery, { lastRowid: result.lastRowid }, {});
 

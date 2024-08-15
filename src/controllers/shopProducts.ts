@@ -12,6 +12,14 @@ module.exports.getAllShopProduct = async function (req, res, next) {
     if (req.query.shopId) {
         params.shopId = req.query.shopId
     }
+
+    if (req.query.groupId) {
+        params.groupId = req.query.groupId
+    }
+
+    if (req.query.searchInput) {
+        params.searchInput = '%' + req.query.searchInput + '%'
+    }
     
     let con: OracleDB.Connection = undefined
     try {

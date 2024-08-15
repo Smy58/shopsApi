@@ -1,7 +1,7 @@
 import Shop from "./shop";
 import Status from "./status";
 import Delivery from "./delivery";
-import Client from "./client";
+import ClientModels from "./client";
 
 const Order = (obj) => {
     return {
@@ -10,7 +10,7 @@ const Order = (obj) => {
         "shop": Shop(obj),
         "status": Status(obj),
         "delivery": Delivery(obj),
-        "client": Client(obj)
+        "client": ClientModels.Client(obj)
     }
 }
 

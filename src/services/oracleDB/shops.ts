@@ -16,11 +16,13 @@ const getAll = async function (con: oracledb.Connection, params: ShopsParams.get
     
     const options = { prefetchRows: params.maxnumrows + 1, fetchArraySize: params.maxnumrows };
     
+    
     try {
         const data = await con.execute(query,params, options);
         const result = data.rows.map(obj => {
             return Shop(obj)
         })
+
 
         return result
     } catch (error){

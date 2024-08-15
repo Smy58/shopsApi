@@ -1,10 +1,14 @@
 import express from 'express'
 import bodyParser from 'body-parser';
-import { errors } from 'celebrate';
+import { celebrate, errors, Joi } from 'celebrate';
+
+const {
+  login, createClient
+} = require('./controllers/clients');
 
 
 const { PORT = 5000 } = process.env;
-const app = express();
+export const app = express();
 
 const database = require('./dbconnection/dbpool');
 
@@ -17,6 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const allowedCors = [
     'localhost:3000',
+    'http://localhost:8080',
 ];
   
 app.use((req, res, next) => {
@@ -25,6 +30,8 @@ app.use((req, res, next) => {
   
     const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
   
+    console.log(origin);
+    
     if (allowedCors.includes(origin)) {
       res.header('Access-Control-Allow-Origin', origin);
     }
@@ -38,6 +45,23 @@ app.use((req, res, next) => {
   
     next();
 });
+
+app.post('/login', celebrate({
+  body: Joi.object().keys({
+      login: Joi.string().min(2).max(30),
+      password: Joi.string()
+  }),
+}), login);
+
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      address: Joi.string(),
+      phone: Joi.string(),
+      mail: Joi.string(),
+      password: Joi.string()
+  }),
+}), createClient);
 
 
 app.use('/shops', require('./routes/shops'));
@@ -62,16 +86,19 @@ app.use((err, req, res, next) => {
   res.send({ message: err.message });
 });
 
-const server = app.listen(PORT, () => console.log(`Running on port ${PORT}`));
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(PORT, () => console.log(`Running on port ${PORT}`));
 
+  process.on('SIGINT', async function () {
+    console.log('Received kill signal, shutting down gracefully')
+    server.close(() => {
+      console.log('HTTP server closed')
+      database.closePool()
+    })
+  })
+
+}
 // process.on('SIGTERM', closeServer)
 
-process.on('SIGINT', closeServer)
 
-async function closeServer() {
-  console.log('Received kill signal, shutting down gracefully')
-  server.close(() => {
-    console.log('HTTP server closed')
-    database.closePool()
-  })
-}
+

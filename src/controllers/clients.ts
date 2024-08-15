@@ -32,14 +32,16 @@ module.exports.createClient = async function (req, res, next) {
         name,
         address,
         phone,
-        mail
+        mail,
+        password
     } = req.body;
     
     const params: ClientParams.create = {
         name,
         address,
         phone,
-        mail
+        mail,
+        password
     };    
 
     let con: OracleDB.Connection = undefined
@@ -61,6 +63,69 @@ module.exports.createClient = async function (req, res, next) {
     
 };
 
+module.exports.updateClientById = async function (req, res, next) {
+    const {
+        name,
+        address,
+        phone,
+        mail
+    } = req.body;
+
+    const params: ClientParams.updateById = { 
+        clientId: req.params.clientId,
+        name,
+        address,
+        phone,
+        mail
+    };
+
+    let con: OracleDB.Connection = undefined
+    try {
+        con = await db_query.getCon()
+        const result = await clientsDbService.updateItem(con, params);
+        res.status(200).json(result);
+    } catch (error){
+        next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
+    }
+}
+
+module.exports.updatePasswordClientById = async function (req, res, next) {
+    const {
+        oldPassword,
+        newPassword
+    } = req.body;
+
+    const params: ClientParams.updatePasswordById = { 
+        clientId: req.params.clientId,
+        oldPassword,
+        newPassword
+    };
+
+    let con: OracleDB.Connection = undefined
+    try {
+        con = await db_query.getCon()
+        const result = await clientsDbService.updatePassword(con, params);
+        res.status(200).json({ message: `Client ${req.params.clientId} updated` });
+    } catch (error){
+        next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
+    }
+}
 
 module.exports.getClientById = async function (req, res, next) {
     const params: ClientParams.getById = { clientId: req.params.clientId };
@@ -91,6 +156,36 @@ module.exports.delClientById = async function (req, res, next) {
         con = await db_query.getCon()
         const result = await clientsDbService.delById(con, params);
         res.status(200).json({ message: `Client ${req.params.clientId} deleted` });
+    } catch (error){
+        next(error);
+    } finally {
+        if (con) {
+            try {
+                await con.close();
+            } catch (err) {
+                throw(err);
+            }
+        }
+    }
+    
+};
+
+module.exports.login = async function (req, res, next) {
+    const {
+        login,
+        password
+    } = req.body;
+    
+    const params: ClientParams.login = {
+        login,
+        password
+    };    
+
+    let con: OracleDB.Connection = undefined
+    try {
+        con = await db_query.getCon()
+        const result = await clientsDbService.login(con, params);
+        res.status(200).json(result);
     } catch (error){
         next(error);
     } finally {

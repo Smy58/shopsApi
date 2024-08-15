@@ -46,10 +46,15 @@ module.exports.createWorker = async function (req, res, next) {
         shopId, 
         roleId
     };
+
+    console.log(params);
+    
     
     let con: OracleDB.Connection = undefined
     try {
         con = await db_query.getCon()
+        console.log(params);
+        
         const result = await workersDbService.createItem(con, params);
         res.status(200).json(result);
     } catch (error){

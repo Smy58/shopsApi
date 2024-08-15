@@ -127,6 +127,9 @@ module.exports.getPositionsByOrderId = async function (req, res, next) {
     if (req.query.orderId) {
         params.orderId = req.query.orderId
     }
+    if (req.params.orderId) {
+        params.orderId = req.params.orderId
+    }
     
     let con: OracleDB.Connection = undefined
     try {

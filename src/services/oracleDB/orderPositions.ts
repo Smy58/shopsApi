@@ -8,9 +8,8 @@ import { OrederPositionsParams } from '../../types/params'
 const getAll = async function (con: oracledb.Connection, params: OrederPositionsParams.getAll, page: number) {
     let query = orderPositionsQueryGet;
     
-    if (params.workerId) {
+    if (params.orderId) {
         query += ` where order_id = :orderId`
-
     }
 
     query += paginationQuery;
@@ -22,6 +21,7 @@ const getAll = async function (con: oracledb.Connection, params: OrederPositions
     const options = { prefetchRows: params.maxnumrows + 1, fetchArraySize: params.maxnumrows };
     
     try {
+        
         const data = await con.execute(query,params, options);
         const result = data.rows.map(obj => {
             return OrderPosition(obj)

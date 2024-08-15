@@ -13,10 +13,30 @@ declare namespace ClientParams{
         address: string,
         phone: string,
         mail: string,
+        password: string
     }
 
     interface getById extends Record<string, string | number | bigint | Date | Buffer | null | undefined> { 
         clientId: number 
+    }
+
+    interface updateById extends Record<string, string | number | bigint | Date | Buffer | null | undefined> { 
+        clientId: number,
+        name: string,
+        address: string,
+        phone: string,
+        mail: string,
+    }
+
+    interface updatePasswordById extends Record<string, string | number | bigint | Date | Buffer | null | undefined> { 
+        clientId: number,
+        oldPassword: string,
+        newPassword: string
+    }
+
+    interface login extends Record<string, string | number | bigint | Date | Buffer | null | undefined> {
+        login: string,
+        password: string,
     }
 }
 

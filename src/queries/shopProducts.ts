@@ -22,3 +22,7 @@ export const getByIdQuery = shopProductsQueryGet + ` where shpr.id = :shopProduc
 export const deleteByIdQuery = `delete from shop_product where id = :shopProductId`
 
 export const paginationQuery = ` order by shpr.id asc OFFSET :offset ROWS FETCH NEXT :maxnumrows ROWS ONLY`
+
+export const getPages = `SELECT 
+       COUNT(*) total_num_rows
+FROM `

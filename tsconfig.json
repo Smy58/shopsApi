@@ -3,5 +3,8 @@
       "esModuleInterop": true,
       "outDir": "dist",
       "baseUrl": "."
-    }
+    },
+    "include": [
+      "src/"
+    ]
 }
